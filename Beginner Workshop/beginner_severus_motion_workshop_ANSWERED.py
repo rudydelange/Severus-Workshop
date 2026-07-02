@@ -33,7 +33,12 @@ ensure_prerequisites()
 
 # --- Tools we will use (do not edit) ---------------------------------------- #
 from mediapipe.tasks.python import vision
-from motion_recognition import draw_landmarks, overlay_states
+from motion_recognition import (
+    draw_landmarks,      # draws the dots + bone-lines (Task 2 answer)
+    emit_commands,       # PRINTS "extend/retract" text (a Task 2 distractor)
+    finger_states,       # COMPUTES extended/retracted (a Task 2 distractor)
+    overlay_states,      # writes the finger words as text (a Task 2 distractor)
+)
 from workshop_engine import parse_args, run_workshop
 from workshop_harness import Task, WorkshopHarness
 
@@ -44,40 +49,67 @@ from workshop_harness import Task, WorkshopHarness
 
 # === TASK 1: Turn ON hand detection =======================================
 # ACTIVATED: HandLandmarker -- the MediaPipe tool that returns the 21 hand
-# keypoints. (PoseLandmarker = whole body, GestureRecognizer = named gestures;
-# both would leave hand detection switched off.)
+# keypoints. (PoseLandmarker = whole body, GestureRecognizer = named gestures,
+# FaceLandmarker = face, ObjectDetector = boxes around objects; all of those
+# would leave hand detection switched off.)
+# PLUGS IN: workshop_engine.py -> run_workshop() (line ~184). Grown-up version:
+# severus_motion_bridge_actual_and_simulation.py -> _make_landmarker() (line ~141).
 ANSWER_1 = None
 # ANSWER_1 = vision.PoseLandmarker
 # ANSWER_1 = vision.GestureRecognizer
+# ANSWER_1 = vision.FaceLandmarker
+# ANSWER_1 = vision.ObjectDetector
 ANSWER_1 = vision.HandLandmarker      # <-- uncommented: this line now takes effect
 
 # === TASK 2: Draw the bony landmarks on screen ============================
 # ACTIVATED: draw_landmarks -- paints the green dots + blue "bone" lines onto the
-# hand. (overlay_states would only write the finger words as text.)
+# hand. (overlay_states writes text; emit_commands prints; finger_states computes
+# -- none of those draw the skeleton.)
+# PLUGS IN: workshop_engine.py -> run_workshop() (line ~222). The function itself:
+# motion_recognition.py -> draw_landmarks() (line ~222). Grown-up version:
+# severus_motion_bridge_actual_and_simulation.py -> run_simulation() (line ~202).
 ANSWER_2 = None
 # ANSWER_2 = overlay_states
+# ANSWER_2 = emit_commands
+# ANSWER_2 = finger_states
 ANSWER_2 = draw_landmarks              # <-- uncommented
 
 # === TASK 3: Decide when a FINGER is extended =============================
 # ACTIVATED: "<" -- the image y-axis points DOWN, so "higher up" is a SMALLER y.
 # An extended finger's tip is above its knuckle, hence  tip_y < knuckle_y.
+# PLUGS IN: workshop_engine.py -> _apply_y_op() (lines ~80-86), called from
+# _compute_states() (line ~107). Grown-up version: motion_recognition.py ->
+# finger_states() (lines ~154-157).
 ANSWER_3 = None
 # ANSWER_3 = ">"
+# ANSWER_3 = ">="
+# ANSWER_3 = "<="
 ANSWER_3 = "<"                          # <-- uncommented
 
 # === TASK 4: Decide when the THUMB is extended ============================
 # ACTIVATED: ">" -- the thumb moves sideways (x). For a right hand an extended
 # thumb's tip is further RIGHT (bigger x) than its lower joint. The program
 # mirrors this automatically for a left hand.
+# PLUGS IN: workshop_engine.py -> _thumb_extended() (lines ~89-98), called from
+# _compute_states() (line ~111). Grown-up version: motion_recognition.py ->
+# finger_states() (lines ~148-151).
 ANSWER_4 = None
 # ANSWER_4 = "<"
+# ANSWER_4 = "<="
+# ANSWER_4 = ">="
 ANSWER_4 = ">"                          # <-- uncommented
 
 # === TASK 5: Make the simulated hand copy you ============================
 # ACTIVATED: 1.0 -- the simulated finger value is its "openness": 1.0 = fully
 # open (extended), 0.0 = fully closed. An extended finger maps to 1.0.
+# PLUGS IN: workshop_engine.py -> run_workshop() (lines ~237-246). Drives the
+# drawn hand via motion_recognition_simulation.py -> render_hand() (line ~375) and
+# the real hand via send_finger_command() (line ~137). Grown-up version:
+# severus_motion_bridge_actual_and_simulation.py -> run_simulation()/run_hardware().
 ANSWER_5 = None
 # ANSWER_5 = 0.0
+# ANSWER_5 = 0.5
+# ANSWER_5 = 2.0
 ANSWER_5 = 1.0                          # <-- uncommented
 
 

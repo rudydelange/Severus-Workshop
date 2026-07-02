@@ -38,26 +38,39 @@ from workshop_harness import Task, WorkshopHarness
 # TASK 1 -- enable hand-landmark detection.
 # The vision task CLASS (no parentheses) that returns 21 hand keypoints in VIDEO
 # mode. The engine calls ANSWER_1.create_from_options(HandLandmarkerOptions(...)).
+# PLUGS IN: workshop_engine.py -> run_workshop(). Standalone equivalent:
+# severus_motion_bridge_actual_and_simulation.py -> _make_landmarker().
 ANSWER_1 = vision.HandLandmarker
 
 # TASK 2 -- draw the bony landmarks.
 # Function reference (no parentheses) drawing 21 dots + skeleton on a BGR frame
 # with signature (frame, hand_landmarks). overlay_states would only write text.
+# PLUGS IN: workshop_engine.py -> run_workshop(). The function itself:
+# motion_recognition.py -> draw_landmarks(); called by the full pipeline in
+# severus_motion_bridge_actual_and_simulation.py -> run_simulation().
 ANSWER_2 = draw_landmarks
 
 # TASK 3 -- classify the four fingers.
 # Operator string for `tip_y <op> pip_y`. Image y grows downward, so an extended
 # (raised) finger has the SMALLER tip y -> use "<".
+# PLUGS IN: workshop_engine.py -> _apply_y_op() (via _compute_states()).
+# Production version: motion_recognition.py -> finger_states().
 ANSWER_3 = "<"
 
 # TASK 4 -- classify the thumb.
 # Operator string for the right-hand case `tip_x <op> ip_x` (mirrored for left).
 # An abducted/extended right thumb has tip x GREATER than ip x -> use ">".
+# PLUGS IN: workshop_engine.py -> _thumb_extended() (via _compute_states()).
+# Production version: the thumb branch of motion_recognition.py -> finger_states().
 ANSWER_4 = ">"
 
 # TASK 5 -- map states onto the simulated hand.
 # Openness float in [0.0, 1.0]; the engine uses ANSWER_5 for an EXTENDED finger
 # and (1.0 - ANSWER_5) for a retracted one. Fully extended/open = 1.0.
+# PLUGS IN: workshop_engine.py -> run_workshop(). Drives the drawn hand via
+# motion_recognition_simulation.py -> render_hand() and the real prosthetic via
+# send_finger_command(); full pipeline: run_simulation()/run_hardware() in
+# severus_motion_bridge_actual_and_simulation.py.
 ANSWER_5 = 1.0
 
 

@@ -57,6 +57,10 @@ from workshop_harness import Task, WorkshopHarness
 #      `ANSWER_1.create_from_options(HandLandmarkerOptions(...))`, so ANSWER_1
 #      must be the matching task CLASS itself (no parentheses). Think: Hand +
 #      Landmarker.
+# PLUGS IN: workshop_engine.py -> run_workshop() builds the detector from your
+#      class (`answers[1].create_from_options(...)`). For the standalone,
+#      non-workshop equivalent see severus_motion_bridge_actual_and_simulation.py
+#      -> _make_landmarker().
 ANSWER_1 = None
 
 # --- TASK 2: draw the bony landmarks --------------------------------------- #
@@ -64,6 +68,10 @@ ANSWER_1 = None
 #      renders the 21 dots and their connecting "bones" onto a BGR frame with the
 #      signature (frame, hand_landmarks). One of your two imports does exactly
 #      that; the other only writes the finger-state TEXT.
+# PLUGS IN: workshop_engine.py -> run_workshop() calls your function once per
+#      frame (`answers[2](frame, hand_landmarks)`). The function itself lives in
+#      motion_recognition.py -> draw_landmarks(); the full pipeline calls it from
+#      severus_motion_bridge_actual_and_simulation.py -> run_simulation().
 ANSWER_2 = None
 
 # --- TASK 3: classify the four fingers ------------------------------------- #
@@ -72,6 +80,10 @@ ANSWER_2 = None
 #      coordinates: the y-axis points DOWN (top = 0), so a finger that is
 #      extended (pointing up) has its TIP higher than its PIP knuckle, i.e. a
 #      smaller y. Choose the operator that makes "extended" come out True.
+# PLUGS IN: workshop_engine.py -> _apply_y_op() (called per finger from
+#      _compute_states()). The hard-wired production version of this rule is in
+#      motion_recognition.py -> finger_states(), the function the full pipeline
+#      severus_motion_bridge_actual_and_simulation.py uses.
 ANSWER_3 = None
 
 # --- TASK 4: classify the thumb -------------------------------------------- #
@@ -79,6 +91,9 @@ ANSWER_3 = None
 #      evaluates the right-hand case as `tip_x <op> ip_x` and mirrors it for a
 #      left hand automatically. For a right hand (palm to camera), an extended
 #      thumb's tip sits further toward +x than its IP joint. Provide "<" or ">".
+# PLUGS IN: workshop_engine.py -> _thumb_extended() (called from
+#      _compute_states()). The production version is the thumb branch of
+#      motion_recognition.py -> finger_states().
 ANSWER_4 = None
 
 # --- TASK 5: map states onto the simulated hand ---------------------------- #
@@ -86,6 +101,12 @@ ANSWER_4 = None
 #      the "openness": the engine sets target = ANSWER_5 when your finger is
 #      EXTENDED and (1.0 - ANSWER_5) when it is retracted. Provide the float that
 #      represents a fully EXTENDED/open finger.
+# PLUGS IN: workshop_engine.py -> run_workshop() turns your float into per-finger
+#      targets. Those drive the drawn hand via
+#      motion_recognition_simulation.py -> render_hand() and the real prosthetic
+#      via send_finger_command(). The full pipeline does the same in
+#      severus_motion_bridge_actual_and_simulation.py -> run_simulation() (drawn)
+#      and run_hardware() (physical).
 ANSWER_5 = None
 
 

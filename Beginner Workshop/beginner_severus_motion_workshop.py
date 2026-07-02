@@ -49,7 +49,12 @@ ensure_prerequisites()
 
 # --- Tools we will use (do not edit) ---------------------------------------- #
 from mediapipe.tasks.python import vision      # the computer-vision toolbox
-from motion_recognition import draw_landmarks, overlay_states
+from motion_recognition import (
+    draw_landmarks,      # draws the dots + bone-lines (Task 2 answer)
+    emit_commands,       # PRINTS "extend/retract" text (a Task 2 distractor)
+    finger_states,       # COMPUTES extended/retracted (a Task 2 distractor)
+    overlay_states,      # writes the finger words as text (a Task 2 distractor)
+)
 from workshop_engine import parse_args, run_workshop
 from workshop_harness import Task, WorkshopHarness
 
@@ -68,13 +73,27 @@ from workshop_harness import Task, WorkshopHarness
 #
 #   vision.PoseLandmarker    -> finds your WHOLE BODY (shoulders, hips...). No good for fingers.
 #   vision.GestureRecognizer -> guesses named gestures (thumbs-up). Not the raw points we need.
+#   vision.FaceLandmarker    -> finds points on your FACE. Wrong body part.
+#   vision.ObjectDetector    -> draws boxes around objects (cup, phone...). Not a hand skeleton.
 #   vision.HandLandmarker    -> finds the 21 points of a HAND.   <-- this is the one we want!
 #
 # Leave the "= None" line as-is; just uncomment your choice BELOW it (the lower
 # line wins). If you pick the wrong one, nothing breaks -- you just get a hint.
+#
+# WHERE YOUR ANSWER PLUGS IN (for the curious):
+#   * The engine turns your choice into the real detector in
+#     workshop_engine.py -> run_workshop(), around line 184:
+#         hand_landmarker = answers[1].create_from_options(options)
+#     (the options right above it, lines ~176-183, ask for the 21 hand points).
+#   * The finished ("grown-up") version of the same line lives in the full
+#     pipeline file severus_motion_bridge_actual_and_simulation.py ->
+#     _make_landmarker() (around line 141), where vision.HandLandmarker is just
+#     written in directly.
 ANSWER_1 = None
 # ANSWER_1 = vision.PoseLandmarker
 # ANSWER_1 = vision.GestureRecognizer
+# ANSWER_1 = vision.FaceLandmarker
+# ANSWER_1 = vision.ObjectDetector
 # ANSWER_1 = vision.HandLandmarker
 
 
@@ -82,14 +101,29 @@ ANSWER_1 = None
 # === TASK 2: Draw the bony landmarks on screen ============================= #
 # --------------------------------------------------------------------------- #
 # Now that the hand is detected, we want to SEE it: green dots on every joint and
-# blue lines for the "bones". There are two ready-made drawing tools:
+# blue lines for the "bones". Below are four ready-made tools. Only ONE actually
+# draws the dots and bone-lines; the others compute or print things instead:
 #
 #   overlay_states  -> writes the finger words ("extended"/"retracted") as text.
+#   emit_commands   -> PRINTS "extend/retract" in the terminal. Draws nothing.
+#   finger_states   -> WORKS OUT which fingers are open. Returns numbers, no drawing.
 #   draw_landmarks  -> draws the dots and bone-lines ON your hand.  <-- we want this one
 #
 # Uncomment the tool that draws the dots and bones.
+#
+# WHERE YOUR ANSWER PLUGS IN (for the curious):
+#   * The engine calls whatever you pick, once per frame, in
+#     workshop_engine.py -> run_workshop(), around line 222:
+#         answers[2](frame, hand_landmarks)
+#   * The tool itself lives in motion_recognition.py -> draw_landmarks()
+#     (around line 222).
+#   * In the full pipeline severus_motion_bridge_actual_and_simulation.py ->
+#     run_simulation() calls exactly this, around line 202:
+#         draw_landmarks(frame, hand_landmarks)
 ANSWER_2 = None
 # ANSWER_2 = overlay_states
+# ANSWER_2 = emit_commands
+# ANSWER_2 = finger_states
 # ANSWER_2 = draw_landmarks
 
 
@@ -106,9 +140,27 @@ ANSWER_2 = None
 # so the fingertip's y is SMALLER than the knuckle's y.
 #
 # Fill in the comparison: "fingertip is extended when  tip_y  ???  knuckle_y".
-# Uncomment "<" (smaller / higher up) or ">" (bigger / lower down).
+# Uncomment the sign that means "tip is HIGHER UP (smaller y) than the knuckle".
+#
+#   ">"   tip_y bigger  (tip LOWER down than the knuckle)
+#   ">="  bigger or equal
+#   "<="  smaller or equal
+#   "<"   tip_y smaller (tip HIGHER UP than the knuckle)   <-- the one we want
+#
+# WHERE YOUR ANSWER PLUGS IN (for the curious):
+#   * Your sign is dropped straight into the comparison in
+#     workshop_engine.py -> _apply_y_op() (around lines 80-86):
+#         if op == "<":  return tip_y < pip_y
+#     which is called for each finger by _compute_states() (around line 107).
+#   * The finished version of this rule is hard-wired in
+#     motion_recognition.py -> finger_states() (around lines 154-157), e.g.
+#         states["index"] = lm[8].y < lm[6].y
+#     (landmark 8 = index tip, 6 = its knuckle). That is the function the full
+#     pipeline severus_motion_bridge_actual_and_simulation.py uses (line ~203).
 ANSWER_3 = None
 # ANSWER_3 = ">"
+# ANSWER_3 = ">="
+# ANSWER_3 = "<="
 # ANSWER_3 = "<"
 
 
@@ -123,9 +175,27 @@ ANSWER_3 = None
 # out to the side) its tip is further to the RIGHT than its lower joint, so the
 # tip's x is BIGGER. (The program flips this automatically for a left hand.)
 #
-# Uncomment ">" (tip further right) or "<" (tip further left).
+# Uncomment the sign that means "tip further RIGHT (bigger x) than the joint".
+#
+#   "<"   tip_x smaller (tip further LEFT)
+#   "<="  smaller or equal
+#   ">="  bigger or equal
+#   ">"   tip_x bigger  (tip further RIGHT)   <-- the one we want
+#
+# WHERE YOUR ANSWER PLUGS IN (for the curious):
+#   * Your sign is used in workshop_engine.py -> _thumb_extended()
+#     (around lines 89-98), which compares the thumb tip's x to its joint's x and
+#     flips the result automatically for a left hand. It is called by
+#     _compute_states() (around line 111).
+#   * The finished version is hard-wired in motion_recognition.py ->
+#     finger_states() (around lines 148-151):
+#         states["thumb"] = lm[4].x > lm[3].x     # for a right hand
+#     (landmark 4 = thumb tip, 3 = its IP joint) -- the same function the full
+#     pipeline severus_motion_bridge_actual_and_simulation.py runs.
 ANSWER_4 = None
 # ANSWER_4 = "<"
+# ANSWER_4 = "<="
+# ANSWER_4 = ">="
 # ANSWER_4 = ">"
 
 
@@ -137,8 +207,30 @@ ANSWER_4 = None
 # We need to tell it: "when MY finger is EXTENDED, set the robot finger to ___".
 #
 # Uncomment the value that means fully OPEN.
+#
+#   0.0   fully closed (wrong -- that is the retracted end)
+#   0.5   half-open (wrong -- only bends the finger halfway)
+#   2.0   past fully open (wrong -- there is no such thing; the range is 0.0..1.0)
+#   1.0   fully open   <-- the one we want
+#
+# WHERE YOUR ANSWER PLUGS IN (for the curious):
+#   * Your number becomes the finger target in workshop_engine.py ->
+#     run_workshop(), around lines 237-246:
+#         ext_val = float(answers[5])
+#         target_ext[name] = ext_val if is_ext else (1.0 - ext_val)
+#   * That target drives TWO things:
+#       - the DRAWN hand: motion_recognition_simulation.py -> render_hand()
+#         (around line 375), and
+#       - the REAL Severus hand: motion_recognition_simulation.py ->
+#         send_finger_command() (around line 137), which sends "f<n>o"/"f<n>c"
+#         over the serial cable.
+#   * In the full pipeline severus_motion_bridge_actual_and_simulation.py the
+#     same mapping lives in run_simulation() (lines ~208-217) for the drawing and
+#     in run_hardware() for the physical hand.
 ANSWER_5 = None
 # ANSWER_5 = 0.0
+# ANSWER_5 = 0.5
+# ANSWER_5 = 2.0
 # ANSWER_5 = 1.0
 
 
@@ -203,22 +295,41 @@ if __name__ == "__main__":
 # just leave it: the lower, uncommented line always wins).
 #
 #   TASK 1:  ANSWER_1 = vision.HandLandmarker
-#       Why: HandLandmarker is the tool that returns the 21 hand points.
+#       Why:   HandLandmarker is the tool that returns the 21 hand points.
+#       Used:  workshop_engine.py -> run_workshop() (line ~184).
+#       Grown-up version: severus_motion_bridge_actual_and_simulation.py ->
+#                         _make_landmarker() (line ~141).
 #
 #   TASK 2:  ANSWER_2 = draw_landmarks
-#       Why: draw_landmarks paints the green dots and blue bone-lines on the hand
-#            (overlay_states would only write text).
+#       Why:   draw_landmarks paints the green dots and blue bone-lines on the
+#              hand (overlay_states/emit_commands/finger_states do not draw it).
+#       Used:  workshop_engine.py -> run_workshop() (line ~222).
+#       The function itself: motion_recognition.py -> draw_landmarks() (line ~222).
+#       Grown-up version: severus_motion_bridge_actual_and_simulation.py ->
+#                         run_simulation() (line ~202).
 #
 #   TASK 3:  ANSWER_3 = "<"
-#       Why: the image y-axis points DOWN, so "higher up" means a SMALLER y. An
-#            extended finger has its tip above the knuckle, so tip_y < knuckle_y.
+#       Why:   the image y-axis points DOWN, so "higher up" means a SMALLER y. An
+#              extended finger has its tip above the knuckle, so tip_y < knuckle_y.
+#       Used:  workshop_engine.py -> _apply_y_op() (lines ~80-86), called from
+#              _compute_states() (line ~107).
+#       Grown-up version: motion_recognition.py -> finger_states() (lines ~154-157),
+#                         which the full pipeline runs at line ~203.
 #
 #   TASK 4:  ANSWER_4 = ">"
-#       Why: the thumb moves sideways. For a right hand, an extended thumb's tip
-#            is further to the RIGHT (bigger x) than its lower joint. The program
-#            mirrors this automatically for a left hand.
+#       Why:   the thumb moves sideways. For a right hand, an extended thumb's tip
+#              is further to the RIGHT (bigger x) than its lower joint. The program
+#              mirrors this automatically for a left hand.
+#       Used:  workshop_engine.py -> _thumb_extended() (lines ~89-98), called from
+#              _compute_states() (line ~111).
+#       Grown-up version: motion_recognition.py -> finger_states() (lines ~148-151).
 #
 #   TASK 5:  ANSWER_5 = 1.0
-#       Why: the simulated finger uses 1.0 = fully open (extended) and
-#            0.0 = fully closed. Your extended finger should map to 1.0.
+#       Why:   the simulated finger uses 1.0 = fully open (extended) and
+#              0.0 = fully closed. Your extended finger should map to 1.0.
+#       Used:  workshop_engine.py -> run_workshop() (lines ~237-246).
+#       Drives: motion_recognition_simulation.py -> render_hand() (line ~375, the
+#               drawn hand) and send_finger_command() (line ~137, the real hand).
+#       Grown-up version: severus_motion_bridge_actual_and_simulation.py ->
+#                         run_simulation() (lines ~208-217) and run_hardware().
 # =========================================================================== #
