@@ -75,7 +75,7 @@ from workshop_harness import Task, WorkshopHarness
 #   vision.GestureRecognizer -> guesses named gestures (thumbs-up). Not the raw points we need.
 #   vision.FaceLandmarker    -> finds points on your FACE. Wrong body part.
 #   vision.ObjectDetector    -> draws boxes around objects (cup, phone...). Not a hand skeleton.
-#   vision.HandLandmarker    -> finds the 21 points of a HAND.   <-- this is the one we want!
+#   vision.HandLandmarker    -> finds the 21 points of a HAND.
 #
 # Leave the "= None" line as-is; just uncomment your choice BELOW it (the lower
 # line wins). If you pick the wrong one, nothing breaks -- you just get a hint.
@@ -107,7 +107,7 @@ ANSWER_1 = None
 #   overlay_states  -> writes the finger words ("extended"/"retracted") as text.
 #   emit_commands   -> PRINTS "extend/retract" in the terminal. Draws nothing.
 #   finger_states   -> WORKS OUT which fingers are open. Returns numbers, no drawing.
-#   draw_landmarks  -> draws the dots and bone-lines ON your hand.  <-- we want this one
+#   draw_landmarks  -> draws the dots and bone-lines ON your hand.
 #
 # Uncomment the tool that draws the dots and bones.
 #
@@ -145,7 +145,7 @@ ANSWER_2 = None
 #   ">"   tip_y bigger  (tip LOWER down than the knuckle)
 #   ">="  bigger or equal
 #   "<="  smaller or equal
-#   "<"   tip_y smaller (tip HIGHER UP than the knuckle)   <-- the one we want
+#   "<"   tip_y smaller (tip HIGHER UP than the knuckle)
 #
 # WHERE YOUR ANSWER PLUGS IN (for the curious):
 #   * Your sign is dropped straight into the comparison in
@@ -180,7 +180,7 @@ ANSWER_3 = None
 #   "<"   tip_x smaller (tip further LEFT)
 #   "<="  smaller or equal
 #   ">="  bigger or equal
-#   ">"   tip_x bigger  (tip further RIGHT)   <-- the one we want
+#   ">"   tip_x bigger  (tip further RIGHT)  
 #
 # WHERE YOUR ANSWER PLUGS IN (for the curious):
 #   * Your sign is used in workshop_engine.py -> _thumb_extended()
@@ -211,7 +211,7 @@ ANSWER_4 = None
 #   0.0   fully closed (wrong -- that is the retracted end)
 #   0.5   half-open (wrong -- only bends the finger halfway)
 #   2.0   past fully open (wrong -- there is no such thing; the range is 0.0..1.0)
-#   1.0   fully open   <-- the one we want
+#   1.0   fully open
 #
 # WHERE YOUR ANSWER PLUGS IN (for the curious):
 #   * Your number becomes the finger target in workshop_engine.py ->
